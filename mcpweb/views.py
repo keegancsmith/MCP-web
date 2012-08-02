@@ -1,8 +1,9 @@
 import json
 
+from mcp import ClientException
 from mcpweb.models import TronGame
 
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404
 
 
@@ -25,5 +26,10 @@ def game(request, game_id, token=None):
 
 
 def game_post(request, game, user):
-    # TODO
-    pass
+    if user not in game.players:
+        return HttpResponseForbidden('You are not playing in this game')
+    game_state = request.POST['game_state']
+    try:
+        game.new_game_state(user, game_state)
+    except ClientException as e:
+        return HttpResponse(str(e), status=400, content_type='text/plain')

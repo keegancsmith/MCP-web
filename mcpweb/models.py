@@ -3,11 +3,6 @@ import mcp
 import random
 import string
 
-try:
-    from cStringIO import StringIO
-except ImportError:
-    from StringIO import StringIO
-
 from datetime import datetime
 
 from django.db import models
@@ -17,8 +12,7 @@ from django.contrib.auth.models import User
 def load_game_state(game_state_str):
     if isinstance(game_state_str, mcp.GameState):
         return game_state_str
-    with StringIO(game_state_str) as fd:
-        return mcp.GameState.read(fd)
+    return mcp.GameState.loads(game_state_str)
 
 
 def generate_token():
@@ -111,10 +105,7 @@ class TronGame(models.Model):
             game_state = new_game_state
         else:
             game_state = new_game_state.flip()
-        with StringIO() as fd:
-            game_state.write(fd)
-            self.game_state = fd.getvalue()
-
+        self.game_state = game_state.dumps()
         self.last_played = datetime.now()
 
         can_move = lambda p: len(list(game_state.neighbours(p))) > 0
