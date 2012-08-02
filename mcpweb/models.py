@@ -151,15 +151,19 @@ class TronGame(models.Model):
     def dictify(self, request, user=None):
         uni = lambda s: None if s is None else unicode(s)
         url = request.build_absolute_uri(self.get_absolute_url())
+        game_state = self.game_state
+        if user == self.player2:
+            game_state = mcp.GameState.loads(game_state).flip().dumps()
 
         return {
             'player_num': self.get_player_num(user),
             'current_player': uni(self.current_player),
             'winners': map(self.get_player_num, self.winners),
             'description': self.description,
-            'game_state': self.game_state,
+            'game_state': game_state,
             'url': url,
-            'players': [],
+            'players': [dictify_user(self.player1),
+                        dictify_user(self.player2)],
         }
 
     @models.permalink
