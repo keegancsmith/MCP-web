@@ -20,6 +20,10 @@ def generate_token():
     return ''.join(random.choice(valid_chars) for _ in xrange(10))
 
 
+def generate_game_state():
+    return mcp.GameState.random_start_game_state().dumps()
+
+
 def dictify_user(user):
     return {
         'username': user.username,
@@ -46,7 +50,7 @@ class TronGame(models.Model):
                               default=u'inprogress')
     description = models.CharField(max_length=50,
                                    default='Waiting for player 1 to go.')
-    game_state = models.TextField()
+    game_state = models.TextField(default=generate_game_state)
     turn = models.IntegerField(default=0)
     date_created = models.DateTimeField(default=datetime.now)
     last_played = models.DateTimeField(default=datetime.now)
@@ -175,7 +179,7 @@ class TronGame(models.Model):
         return ('tron-game', [str(self.id)])
 
     def __unicode__(self):
-        game_str = u'Tron Game %d - %s' % (self.pk, self.name)
+        game_str = u'Tron Game %d' % (self.pk)
 
         def mark_current_player(p):
             if p == self.current_user:

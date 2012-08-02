@@ -54,6 +54,10 @@ MIDDLEWARE_CLASSES = (
 
 ROOT_URLCONF = 'mcpweb.urls'
 
+TEMPLATE_CONTEXT_PROCESSORS = (
+    'django.contrib.auth.context_processors.auth',
+    'django.contrib.messages.context_processors.messages',
+)
 
 INSTALLED_APPS = (
     'django.contrib.auth',
@@ -62,6 +66,7 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.admin',
 
     'crispy_forms',
     'mcpweb',
