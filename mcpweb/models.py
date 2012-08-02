@@ -59,6 +59,9 @@ class TronGame(models.Model):
     player2_token = models.CharField(max_length=10, default=generate_token,
                                      editable=False)
 
+    class Meta:
+        ordering = ['-date_created']
+
     def get_user(self, num):
         if num is None:
             return None
