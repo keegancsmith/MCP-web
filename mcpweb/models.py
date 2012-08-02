@@ -31,6 +31,7 @@ def dictify_user(user):
         'username': user.username,
     }
 
+
 class TronGame(models.Model):
     WINNER_CHOICES = (
         (u'inprogress', u'inprogress'),
@@ -50,7 +51,8 @@ class TronGame(models.Model):
     current_player = models.IntegerField(blank=True, null=True, default=1)
     winner = models.CharField(max_length=10, choices=WINNER_CHOICES,
                               default=u'inprogress')
-    description = models.CharField(max_length=50)
+    description = models.CharField(max_length=50,
+                                   default='Waiting for player 1 to go.')
     game_state = models.TextField()
     turn = models.IntegerField(default=0)
     date_created = models.DateTimeField(default=datetime.now)
@@ -146,8 +148,18 @@ class TronGame(models.Model):
         self.last_played = datetime.now()
         self.save()
 
-    def dictify(self, user=None):
+    def save(self, *args, **kw):
+        ret = super(TronGame, self).save(*args, **kw)
+        if not self.trongamestatehistory_set.filter(turn=self.turn).exists():
+            h = TronGameStateHistory(tron_game=self,
+                                     game_state=self.game_state,
+                                     turn=self.turn)
+            h.save()
+        return ret
+
+    def dictify(self, request, user=None):
         uni = lambda s: None if s is None else unicode(s)
+        url = request.build_absolute_uri(self.get_absolute_url())
 
         return {
             'player_num': self.get_player_num(user),
@@ -155,7 +167,7 @@ class TronGame(models.Model):
             'winners': map(self.get_player_num, self.winners),
             'description': self.description,
             'game_state': self.game_state,
-            'url': self.get_absolute_url(),
+            'url': url,
             'players': [],
         }
 
