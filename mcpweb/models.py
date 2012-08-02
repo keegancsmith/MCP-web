@@ -42,7 +42,6 @@ class TronGame(models.Model):
 
     player1 = models.ForeignKey(User, related_name='player1')
     player2 = models.ForeignKey(User, related_name='player2')
-    current_player = models.IntegerField(blank=True, null=True, default=1)
     winner = models.CharField(max_length=10, choices=WINNER_CHOICES,
                               default=u'inprogress')
     description = models.CharField(max_length=50,
@@ -65,6 +64,11 @@ class TronGame(models.Model):
         if user is None:
             return None
         return unicode(self.players.index(user) + 1)
+
+    @property
+    def current_player(self):
+        if self.winner == u'inprogress':
+            return self.turn % 2 + 1
 
     @property
     def current_user(self):
