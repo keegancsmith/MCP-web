@@ -3,7 +3,8 @@ import json
 from mcp import ClientException
 from mcpweb.models import TronGame
 
-from django.http import HttpResponse, HttpResponseForbidden
+from django.http import HttpResponse, HttpResponseForbidden, \
+    HttpResponseNotFound
 from django.shortcuts import get_object_or_404
 
 
@@ -13,6 +14,12 @@ def game(request, game_id, token=None):
     # If the token matches one of the player tokens, we act as that User
     if token is not None:
         token = token.strip('/')
+        if token == game.player1_token:
+            user = game.player1
+        elif token == game.player2_token:
+            user = game.player2
+        else:
+            return HttpResponseNotFound()
     elif request.user.is_authenticated():
         user = request.user
     else:
@@ -31,5 +38,6 @@ def game_post(request, game, user):
     game_state = request.POST['game_state']
     try:
         game.new_game_state(user, game_state)
+        return HttpResponse('success')
     except ClientException as e:
         return HttpResponse(str(e), status=400, content_type='text/plain')

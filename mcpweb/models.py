@@ -129,7 +129,6 @@ class TronGame(models.Model):
         elif not p2_can_move:
             self.end_game('player1')
         else:
-            self.current_player = self.get_player_num(user) % 2 + 1
             self.description = (u'Waiting for player %d to go.'
                                 % self.current_player)
             self.turn += 1
@@ -141,10 +140,9 @@ class TronGame(models.Model):
                 winner = u'tie'
             else:
                 assert len(winner) == 1
-                winner = u'player%d' % self.get_player_num(winner[0])
+                winner = u'player%s' % self.get_player_num(winner[0])
         if description is None:
             description = TronGame.DEFAULT_END_GAME_DESCRIPTIONS[winner]
-        self.current_player = None
         self.winner = winner
         self.description = description
         self.last_played = datetime.now()
