@@ -99,7 +99,7 @@ class TronGame(models.Model):
 
     def game_state_for_user(self, user=None):
         gs = load_game_state(self.game_state)
-        if self.get_player_num(user) == '2':
+        if self.player2 == user:
             return gs.flip()
         return gs
 
@@ -129,9 +129,9 @@ class TronGame(models.Model):
         elif not p2_can_move:
             self.end_game('player1')
         else:
+            self.turn += 1
             self.description = (u'Waiting for player %d to go.'
                                 % self.current_player)
-            self.turn += 1
             self.save()
 
     def end_game(self, winner, description=None):
