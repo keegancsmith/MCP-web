@@ -7,15 +7,27 @@ from django.core.cache import cache
 from django.http import HttpResponse, HttpResponseForbidden, \
     HttpResponseNotFound
 from django.shortcuts import get_object_or_404
+from django.views.decorators.http import condition
 
 
-def game(request, game_id):
-    game = get_object_or_404(TronGame, id=game_id)
-    return HttpResponse('hello %d' % game.id)
+def game_view(func):
+    def f(request, game_id, *args, **kw):
+        game = get_object_or_404(TronGame, pk=game_id)
+        request.game = game
+        return func(request, *args, **kw)
+    return f
 
 
-def game_api(request, game_id, token):
-    game = get_object_or_404(TronGame, id=game_id)
+@game_view
+def game(request):
+    return HttpResponse('hello %d' % request.game.id)
+
+
+@game_view
+@condition(etag_func=lambda r, *a, **k: str(r.game.turn),
+           last_modified_func=lambda r, *a, **k: r.game.last_played)
+def game_api(request, token):
+    game = request.game
 
     # The token specifies which player we act as, which will affect the JSON
     # response we return
