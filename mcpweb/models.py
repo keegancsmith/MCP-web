@@ -20,6 +20,13 @@ def generate_token():
     return ''.join(random.choice(valid_chars) for _ in xrange(10))
 
 
+def generate_player_token():
+    while True:
+        token = generate_token()
+        if token != 'public':
+            return token
+
+
 def generate_game_state():
     return mcp.GameState.random_start_game_state().dumps()
 
@@ -54,10 +61,10 @@ class TronGame(models.Model):
     turn = models.IntegerField(default=0)
     date_created = models.DateTimeField(default=datetime.now)
     last_played = models.DateTimeField(default=datetime.now)
-    player1_token = models.CharField(max_length=10, default=generate_token,
-                                     editable=False)
-    player2_token = models.CharField(max_length=10, default=generate_token,
-                                     editable=False)
+    player1_token = models.CharField(max_length=10, editable=False,
+                                     default=generate_player_token)
+    player2_token = models.CharField(max_length=10, editable=False,
+                                     default=generate_player_token)
 
     class Meta:
         ordering = ['-date_created']
