@@ -103,16 +103,16 @@ class TronGame(models.Model):
             return gs.flip()
         return gs
 
-    def new_game_state(self, user, new_game_state):
-        assert user == self.current_user
+    def new_game_state(self, player, new_game_state):
+        assert player == self.current_user
 
         # Check if the move is legit
-        old_game_state = self.game_state_for_user(user)
+        old_game_state = self.game_state_for_user(player)
         new_game_state = load_game_state(new_game_state)
         old_game_state.validate_move(new_game_state)
 
         # Move is valid. Update everything (possibly ending the game)
-        if self.player1 == user:
+        if self.player1 == player:
             game_state = new_game_state
         else:
             game_state = new_game_state.flip()
@@ -157,15 +157,15 @@ class TronGame(models.Model):
             h.save()
         return ret
 
-    def dictify(self, request, user=None):
+    def dictify(self, request, player=None):
         uni = lambda s: None if s is None else unicode(s)
         url = request.build_absolute_uri(self.get_absolute_url())
         game_state = self.game_state
-        if user == self.player2:
+        if player == self.player2:
             game_state = mcp.GameState.loads(game_state).flip().dumps()
 
         return {
-            'player_num': self.get_player_num(user),
+            'player_num': self.get_player_num(player),
             'current_player': uni(self.current_player),
             'winners': map(self.get_player_num, self.winners),
             'description': self.description,
