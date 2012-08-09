@@ -4,7 +4,7 @@ var tron_game_viewer = {
     ctx: null,
     state: null,
     game_state: null,
-    cell_size: 450 / 30,
+    cell_size: 600 / 30,
 
     init: function(urls, canvas) {
         this.urls = urls;
