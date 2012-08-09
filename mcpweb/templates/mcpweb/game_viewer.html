@@ -15,6 +15,12 @@
         <a href="http://www.google.com/chrome/">browser</a>.
       </canvas>
     </div>
+    <div id="info">
+      <ul>
+      {% if player1_url %}<li>Player 1 {{ player1_url }}</li>{% endif %}
+      {% if player2_url %}<li>Player 2 {{ player2_url }}</li>{% endif %}
+      </ul>
+    </div>
     <div id="footnote">
       Created by <a href="http://people.cs.uct.ac.za/~ksmith/">Keegan Carruthers-Smith</a> 2012
       <a href="https://bitbucket.org/keegan_csmith/mcp-web">[SRC]</a>

@@ -111,7 +111,9 @@ class TronGame(models.Model):
         return gs
 
     def new_game_state(self, player, new_game_state):
-        assert player == self.current_user
+        if player != self.current_user:
+            raise Exception('Not %s turn. Currently it is %s turn'
+                            % (player, self.current_user))
 
         # Check if the move is legit
         old_game_state = self.game_state_for_user(player)

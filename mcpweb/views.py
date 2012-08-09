@@ -23,8 +23,17 @@ def game_view(func):
 
 @game_view
 def game_viewer(request):
-    return render(request, 'mcpweb/game_viewer.html',
-                  {'game': request.game})
+    game = request.game
+    user = request.user
+
+    context = {'game': game}
+    game_url = request.build_absolute_uri(game.get_absolute_url())
+    if user.is_superuser or user == game.player1:
+        context['player1_url'] = '%s%s/' % (game_url, game.player1_token)
+    if user.is_superuser or user == game.player2:
+        context['player2_url'] = '%s%s/' % (game_url, game.player2_token)
+
+    return render(request, 'mcpweb/game_viewer.html', context)
 
 
 @game_view
