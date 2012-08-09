@@ -2,12 +2,14 @@ import json
 
 from mcp import ClientException
 from mcpweb.models import TronGame
+from mcpweb.forms import NewTronGameForm
 
+from django.contrib.auth.decorators import login_required
 from django.core.cache import cache
 from django.http import HttpResponse, HttpResponseForbidden, \
-    HttpResponseNotFound
-from django.shortcuts import get_object_or_404, render_to_response
-from django.template import RequestContext
+    HttpResponseNotFound, HttpResponseRedirect
+from django.shortcuts import get_object_or_404, render
+from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.http import condition
 
 
@@ -21,9 +23,8 @@ def game_view(func):
 
 @game_view
 def game_viewer(request):
-    return render_to_response('mcpweb/game_viewer.html',
-                              {'game': request.game},
-                              context_instance=RequestContext(request))
+    return render(request, 'mcpweb/game_viewer.html',
+                  {'game': request.game})
 
 
 @game_view
@@ -61,3 +62,18 @@ def game_api(request, token):
         cache.set(cache_key, json_state, version=game.turn)
 
     return HttpResponse(json_state, content_type='application/json')
+
+
+@csrf_protect
+@login_required
+def new_game(request):
+    if request.method == 'POST':
+        form = NewTronGameForm(request.POST)
+        if form.is_valid():
+            game = form.create_game(request.user)
+            return HttpResponseRedirect(game.get_absolute_url())
+    else:
+        form = NewTronGameForm()
+
+    return render(request, 'mcpweb/new_game.html',
+                  {'form': form})

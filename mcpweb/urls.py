@@ -8,6 +8,7 @@ urlpatterns = patterns(
     'mcpweb.views',
     url(r'^game/(\d+)/$', 'game_viewer', name='tron-game'),
     url(r'^game/(\d+)/([a-zA-Z0-9]+)/$', 'game_api', name='tron-game-api'),
+    url(r'^new-game/$', 'new_game', name='new-tron-game'),
 
     url(r'^admin/', include(admin.site.urls)),
 )
