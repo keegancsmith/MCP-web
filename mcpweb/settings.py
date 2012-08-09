@@ -54,6 +54,7 @@ MIDDLEWARE_CLASSES = (
 ROOT_URLCONF = 'mcpweb.urls'
 
 TEMPLATE_CONTEXT_PROCESSORS = (
+    'django.core.context_processors.static',
     'django.contrib.auth.context_processors.auth',
     'django.contrib.messages.context_processors.messages',
 )

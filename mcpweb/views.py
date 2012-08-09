@@ -6,7 +6,8 @@ from mcpweb.models import TronGame
 from django.core.cache import cache
 from django.http import HttpResponse, HttpResponseForbidden, \
     HttpResponseNotFound
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, render_to_response
+from django.template import RequestContext
 from django.views.decorators.http import condition
 
 
@@ -19,8 +20,10 @@ def game_view(func):
 
 
 @game_view
-def game(request):
-    return HttpResponse('hello %d' % request.game.id)
+def game_viewer(request):
+    return render_to_response('mcpweb/game_viewer.html',
+                              {'game': request.game},
+                              context_instance=RequestContext(request))
 
 
 @game_view

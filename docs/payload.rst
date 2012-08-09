@@ -7,12 +7,13 @@ is returned describing the state of the current game. The schema of the array
 is::
 
   {
-    'player_num': ['1' | '2' | null],
-    'current_player': ['1' | '2' | null],
+    'player_num': [1 | 2 | null],
+    'current_player': [1 | 2 | null],
     'winners': [], // List of winner numbers
     'description': '', // Description of the current state of the game
     'game_state': '', // The gamestate file as described in the specification
     'url': '', // Public URL for the game
+    'turn': 0, // The turn number. Initially zero. Increments for each turn played
     'players': [
       { ... }, // Player 1
       { ... }  // Player 2

@@ -77,7 +77,7 @@ class TronGame(models.Model):
     def get_player_num(self, user):
         if user is None:
             return None
-        return unicode(self.players.index(user) + 1)
+        return self.players.index(user) + 1
 
     @property
     def current_player(self):
@@ -147,7 +147,7 @@ class TronGame(models.Model):
                 winner = u'tie'
             else:
                 assert len(winner) == 1
-                winner = u'player%s' % self.get_player_num(winner[0])
+                winner = u'player%d' % self.get_player_num(winner[0])
         if description is None:
             description = TronGame.DEFAULT_END_GAME_DESCRIPTIONS[winner]
         self.winner = winner
@@ -165,7 +165,6 @@ class TronGame(models.Model):
         return ret
 
     def dictify(self, request, player=None):
-        uni = lambda s: None if s is None else unicode(s)
         url = request.build_absolute_uri(self.get_absolute_url())
         game_state = self.game_state
         if player == self.player2:
@@ -173,11 +172,12 @@ class TronGame(models.Model):
 
         return {
             'player_num': self.get_player_num(player),
-            'current_player': uni(self.current_player),
+            'current_player': self.current_player,
             'winners': map(self.get_player_num, self.winners),
             'description': self.description,
             'game_state': game_state,
             'url': url,
+            'turn': self.turn,
             'players': [dictify_user(self.player1),
                         dictify_user(self.player2)],
         }
