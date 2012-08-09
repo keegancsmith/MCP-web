@@ -127,6 +127,7 @@ class TronGame(models.Model):
             game_state = new_game_state.flip()
         self.game_state = game_state.dumps()
         self.last_played = datetime.now()
+        self.turn += 1
 
         can_move = lambda p: len(list(game_state.neighbours(p))) > 0
         p1_can_move = can_move(game_state.you)
@@ -138,7 +139,6 @@ class TronGame(models.Model):
         elif not p2_can_move:
             self.end_game('player1')
         else:
-            self.turn += 1
             self.description = (u'Waiting for player %d to go.'
                                 % self.current_player)
             self.save()
