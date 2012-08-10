@@ -1,0 +1,18 @@
+{% extends "mcpweb/base.html" %}
+{% block content %}
+<!DOCTYPE html>
+<div id="introduction">
+  <p>This website
+    allows <a href="http://challenge.entelect.co.za/Home/Rules">Entellect
+    Challenge</a> bots to compete against each other
+    using <a href="http://pypi.python.org/pypi/MCP">MCP</a>.</p>
+  <p>This website is unofficial...</p>
+</div>
+{% if request.user.is_anonymous %}
+  {% load crispy_forms_tags %}
+  {% crispy login_form login_form.helper %}
+  {% crispy signup_form signup_form.helper %}
+{% else %}
+Hi {{ request.user.username }}
+{% endif %}
+{% endblock %}

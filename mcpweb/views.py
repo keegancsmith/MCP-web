@@ -2,10 +2,11 @@ import json
 
 from mcp import ClientException
 from mcpweb.models import TronGame
-from mcpweb.forms import NewTronGameForm
+from mcpweb.forms import AuthenticationForm, NewTronGameForm, UserCreationForm
 
 from django.contrib.auth.decorators import login_required
 from django.core.cache import cache
+from django.core.urlresolvers import reverse
 from django.http import HttpResponse, HttpResponseForbidden, \
     HttpResponseNotFound, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
@@ -88,5 +89,42 @@ def new_game(request):
     else:
         form = NewTronGameForm()
 
-    return render(request, 'mcpweb/new_game.html',
+    return render(request, 'mcpweb/form.html',
                   {'form': form, 'title': 'New Game'})
+
+
+def home(request):
+    context = {
+        'request': request,
+        'signup_form': UserCreationForm(),
+        'login_form': AuthenticationForm(request),
+    }
+    return render(request, 'mcpweb/home.html', context)
+
+
+@csrf_protect
+def signup(request):
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(reverse('home'))
+    else:
+        form = UserCreationForm()
+
+    return render(request, 'mcpweb/form.html',
+                  {'form': form, 'title': 'Login'})
+
+
+@csrf_protect
+def login(request):
+    if request.method == 'POST':
+        form = AuthenticationForm(data=request.POST)
+        if form.is_valid():
+            auth_login(request, form.get_user())
+            return HttpResponseRedirect(reverse('home'))
+    else:
+        form = AuthenticationForm(request)
+
+    return render(request, 'mcpweb/form.html',
+                  {'form': form, 'title': 'Login'})
