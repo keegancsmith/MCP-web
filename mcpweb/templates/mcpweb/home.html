@@ -13,6 +13,20 @@
   {% crispy login_form login_form.helper %}
   {% crispy signup_form signup_form.helper %}
 {% else %}
-Hi {{ request.user.username }}
+<h3>Hi {{ user.username }}, you are currently playing in {{ active.count }}
+games. You have finished {{ finished.count }} games.</h3>
+<h2>Active Games</h2>
+<ul>
+  {% for game in active %}
+  <li><a href="{{ game.get_absolute_url }}">{{ game }}</a></li>
+  {% endfor %}
+</ul>
+
+<h2>Finished Games</h2>
+<ul>
+{% for game in finished %}
+  <li><a href="{{ game.get_absolute_url }}">{{ game }}</a></li>
+  {% endfor %}
+</ul>
 {% endif %}
 {% endblock %}

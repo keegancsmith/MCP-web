@@ -198,7 +198,7 @@ class TronGame(models.Model):
                 return unicode(p)
         players_str = u', '.join(map(mark_current_player, self.players))
         if self.winners:
-            game_str += u' won by %s' % unicode(self.winners)
+            game_str += u' won by %s.' % u' and '.join(map(unicode, self.winners))
         return u'%s %s' % (game_str, players_str)
 
 

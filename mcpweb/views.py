@@ -99,6 +99,11 @@ def home(request):
         'signup_form': UserCreationForm(),
         'login_form': AuthenticationForm(request),
     }
+
+    if request.user.is_authenticated():
+        context['active'] = TronGame.objects.filter(winner=u'inprogress')
+        context['finished'] = TronGame.objects.exclude(winner=u'inprogress')
+
     return render(request, 'mcpweb/home.html', context)
 
 
