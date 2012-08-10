@@ -1,10 +1,14 @@
+var ui_constants = {
+    width: 500,
+    height: 600
+};
+
 var tron_game_viewer = {
     urls: null,
     canvas: null,
     ctx: null,
     state: null,
     game_state: null,
-    cell_size: 600 / 30,
 
     init: function(urls, canvas) {
         this.urls = urls;
@@ -59,15 +63,54 @@ var tron_game_viewer = {
             OpponentWall: '#38c6e2',
             Clear: '#7cff82'
         };
+        var cell_size = ui_constants.width / 30;
+        var ctx = this.ctx;
+        var i;
 
-        for (var i = 0; i < this.game_state.length; i++) {
+        ctx.save();
+
+        // Cell contents
+        for (i = 0; i < this.game_state.length; i++) {
             var row = this.game_state[i];
             for (var j = 0; j < row.length; j++) {
-                this.ctx.fillStyle = colour_map[row[j]];
-                this.ctx.fillRect(i * this.cell_size, j * this.cell_size,
-                                  this.cell_size, this.cell_size);
+                ctx.fillStyle = colour_map[row[j]];
+                ctx.fillRect(i * cell_size, j * cell_size,
+                             cell_size, cell_size);
             }
         }
+
+        // Legend
+        function legend(y, colour, text) {
+            var x = cell_size * 3;
+            ctx.fillStyle = colour;
+            ctx.fillRect(x, y, cell_size, cell_size);
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'middle';
+            ctx.fillStyle = 'black';
+            ctx.font = 'bold 16px sans-serif';
+            ctx.fillText(text, x + cell_size * 1.3, y + cell_size / 2);
+        }
+        legend(cell_size * 30.5, colour_map['You'],
+               'Player 1 - ' + this.state.players[0].username);
+        legend(cell_size * 32.5, colour_map['Opponent'],
+               'Player 2 - ' + this.state.players[1].username);
+
+        // Grid
+        function draw_line(x1, y1, x2, y2) {
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.stroke();
+        }
+        ctx.strokeStyle = 'rgba(0, 0, 0, 0.2)';
+        ctx.lineWidth = 1;
+        for (i = 0; i <= 30; i++) {
+            var offset = i * cell_size;
+            draw_line(offset, 0, offset, ui_constants.width);
+            draw_line(0, offset, ui_constants.width, offset);
+        }
+
+        ctx.restore();
     }
 };
 
