@@ -1,35 +1,27 @@
-<!DOCTYPE html>
-<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
-  <head>
-    <title>Tron Game :: {{ game.id }} :: {{ game.player1.username }} vs {{ game.player2.username }}</title>
-    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}styles/mcp.css" />
-    <script type="text/javascript" src="{{ STATIC_URL }}scripts/jquery.min.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}scripts/json2.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}scripts/mcp.js"></script>
-  </head>
-  <body>
-    <div id="game">
-      <canvas id="canvas" width="500" height="600" tabindex="0">Your browser does not
-        support canvas. Upgrade to a
-        <a href="http://www.mozilla.com/en-US/firefox/new/">modern</a>
-        <a href="http://www.google.com/chrome/">browser</a>.
-      </canvas>
-    </div>
-    <div id="info">
-      <ul>
-      {% if player1_url %}<li>Player 1 {{ player1_url }}</li>{% endif %}
-      {% if player2_url %}<li>Player 2 {{ player2_url }}</li>{% endif %}
-      </ul>
-    </div>
-    <div id="footnote">
-      Created by <a href="http://people.cs.uct.ac.za/~ksmith/">Keegan Carruthers-Smith</a> 2012
-      <a href="https://bitbucket.org/keegan_csmith/mcp-web">[SRC]</a>
-    </div>
-    <script type="text/javascript">
-      init({
-         game: "{% url tron-game-api game.id 'public' %}"
-      });
-    </script>
-    <a href="https://github.com/keegancsmith/MCP-web/"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png" alt="Fork me on GitHub"></a>
-  </body>
-</html>
+{% extends "mcpweb/base.html" %}
+{% block extra_head %}
+<script type="text/javascript" src="{{ STATIC_URL }}scripts/jquery.min.js"></script>
+<script type="text/javascript" src="{{ STATIC_URL }}scripts/json2.js"></script>
+<script type="text/javascript" src="{{ STATIC_URL }}scripts/mcp.js"></script>
+{% endblock %}
+
+{% block content %}
+<div id="game">
+  <canvas id="canvas" width="500" height="600" tabindex="0">Your browser
+    does not support canvas. Upgrade to a
+    <a href="http://www.mozilla.com/en-US/firefox/new/">modern</a>
+    <a href="http://www.google.com/chrome/">browser</a>.
+  </canvas>
+</div>
+<div id="info">
+  <ul>
+    {% if player1_url %}<li>Player 1 {{ player1_url }}</li>{% endif %}
+    {% if player2_url %}<li>Player 2 {{ player2_url }}</li>{% endif %}
+  </ul>
+</div>
+<script type="text/javascript">
+  init({
+      game: "{% url tron-game-api game.id 'public' %}"
+  });
+</script>
+{% endblock %}

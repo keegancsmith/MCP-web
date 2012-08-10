@@ -26,7 +26,11 @@ def game_viewer(request):
     game = request.game
     user = request.user
 
-    context = {'game': game}
+    context = {
+        'game': game,
+        'title': (u'Game %d - %s vs %s'
+                  % (game.id, game.player1.username, game.player2.username)),
+    }
     game_url = request.build_absolute_uri(game.get_absolute_url())
     if user.is_superuser or user == game.player1:
         context['player1_url'] = '%s%s/' % (game_url, game.player1_token)
@@ -85,4 +89,4 @@ def new_game(request):
         form = NewTronGameForm()
 
     return render(request, 'mcpweb/new_game.html',
-                  {'form': form})
+                  {'form': form, 'title': 'New Game'})
