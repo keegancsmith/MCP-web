@@ -3,8 +3,8 @@ from django.conf.global_settings import *
 import hashlib
 import socket
 
-DEBUG = True
-TEMPLATE_DEBUG = True
+DEBUG = False
+TEMPLATE_DEBUG = False
 
 ADMINS = ()
 MANAGERS = ADMINS
@@ -87,10 +87,6 @@ LOGGING = {
             'filters': ['require_debug_false'],
             'class': 'django.utils.log.AdminEmailHandler'
         },
-        'console':{
-            'level':'DEBUG',
-            'class':'logging.StreamHandler',
-        },
     },
     'loggers': {
         'django.request': {
@@ -98,10 +94,10 @@ LOGGING = {
             'level': 'ERROR',
             'propagate': True,
         },
-        'django.request': {
-            'handlers': ['console'],
-            'level': 'ERROR',
-            'propagate': True,
-        },
     }
 }
+
+try:
+    from local_settings import *
+except ImportError:
+    pass

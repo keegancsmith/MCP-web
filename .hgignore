@@ -1,3 +1,4 @@
 syntax: glob
 *.pyc
 mcpweb.db
+mcpweb/local_settings.py
