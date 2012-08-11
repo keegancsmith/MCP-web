@@ -68,6 +68,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django.contrib.admin',
 
+    'gunicorn',
     'crispy_forms',
     'mcpweb',
     'south',
