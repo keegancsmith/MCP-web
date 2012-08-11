@@ -1,0 +1,5 @@
+Django==1.4.1
+MCP==0.1
+South==0.7.5
+django-crispy-forms==1.1.4
+gunicorn==0.14.6
