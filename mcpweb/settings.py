@@ -1,4 +1,5 @@
 from django.conf.global_settings import *
+from django.utils.log import getLogger
 
 import hashlib
 import socket
@@ -88,6 +89,11 @@ LOGGING = {
             'filters': ['require_debug_false'],
             'class': 'django.utils.log.AdminEmailHandler'
         },
+        'console': {
+            'level': 'DEBUG',
+            'filters': ['require_debug_false'],
+            'class': 'logging.StreamHandler',
+        },
     },
     'loggers': {
         'django.request': {
@@ -95,10 +101,17 @@ LOGGING = {
             'level': 'ERROR',
             'propagate': True,
         },
+        'mcpweb': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
     }
 }
 
+log = getLogger('wpcweb.settings')
 try:
     from local_settings import *
+    log.info('Imported local_settings')
 except ImportError:
-    pass
+    log.warning('Could not import local_settings')
