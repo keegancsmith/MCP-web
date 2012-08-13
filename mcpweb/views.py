@@ -97,7 +97,6 @@ def new_game(request):
 @csrf_protect
 def home(request):
     context = {
-        'request': request,
         'signup_form': UserCreationForm(),
         'login_form': AuthenticationForm(request),
     }

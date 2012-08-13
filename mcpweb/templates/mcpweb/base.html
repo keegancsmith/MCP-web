@@ -3,11 +3,36 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>MCP Web :: Entellect Challenge Tron AI{% if title %} :: {{ title }}{% endif %}</title>
-    <link href="{{ STATIC_URL }}styles/mcp.css" rel="stylesheet" type="text/css" media="screen">
+    <link href="{{ STATIC_URL }}styles/bootstrap.css" rel="stylesheet" type="text/css" media="screen">
     {% block extra_head %}{% endblock %}
   </head>
   <body>
-    <div id="content" class="content-wrap">
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="{% url tron-home %}">MCP Web</a>
+          {% if request.user.is_anonymous %}
+          <ul class="nav nav-pills pull-right">
+            <li><a href="{% url login %}">Login</a></li>
+            <li><a href="{% url signup %}">Signup</a></li>
+          </ul>
+          {% else %}
+          <div class="btn-group pull-right">
+            <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+              {{ request.user.username }}
+              <span class="caret"></span>
+            </a>
+            <ul class="dropdown-menu">
+              <li><a href="{% url logout %}">Sign Out</a></li>
+            </ul>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div id="content" class="container">
     {% block content %}
     {% endblock %}
     </div>
@@ -15,15 +40,18 @@
     {% block extra_content %}
     {% endblock %}
 
-    <div id="footer">
+    <div id="footer" class="container pull-right">
     {% block footer %}
-    <div id="footnote">
-      Created by <a href="http://people.cs.uct.ac.za/~ksmith/">Keegan
-      Carruthers-Smith</a> 2012
-      <a href="https://bitbucket.org/keegan_csmith/mcp-web">[SRC]</a>
-    </div>
-    <a href="https://github.com/keegancsmith/MCP-web/"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png" alt="Fork me on GitHub"></a>
+    Created by <a href="http://people.cs.uct.ac.za/~ksmith/">Keegan
+    Carruthers-Smith</a> 2012
+    [<a href="https://bitbucket.org/keegan_csmith/mcp-web">Bitbucket</a>]
+    [<a href="https://github.com/keegancsmith/MCP-web">Github</a>]
     {% endblock %}
     </div>
+
+    <script type="text/javascript" src="{{ STATIC_URL }}scripts/jquery.min.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}scripts/bootstrap.min.js"></script>
+    {% block scripts %}
+    {% endblock %}
   </body>
 </html>
