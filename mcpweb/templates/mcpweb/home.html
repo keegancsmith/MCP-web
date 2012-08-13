@@ -10,8 +10,12 @@
 </div>
 {% if request.user.is_anonymous %}
   {% load crispy_forms_tags %}
+<div id="login_form"><h2>Login</h2>
   {% crispy login_form login_form.helper %}
+</div>
+<div id="signup_form"><h2>Signup</h2>
   {% crispy signup_form signup_form.helper %}
+</div>
 {% else %}
 <h3>Hi {{ user.username }}, you are currently playing in {{ active.count }}
 games. You have finished {{ finished.count }} games.</h3>

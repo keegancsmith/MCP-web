@@ -4,6 +4,7 @@ from mcp import ClientException
 from mcpweb.models import TronGame
 from mcpweb.forms import AuthenticationForm, NewTronGameForm, UserCreationForm
 
+from django.contrib.auth import login as auth_login
 from django.contrib.auth.decorators import login_required
 from django.core.cache import cache
 from django.core.urlresolvers import reverse
@@ -93,6 +94,7 @@ def new_game(request):
                   {'form': form, 'title': 'New Game'})
 
 
+@csrf_protect
 def home(request):
     context = {
         'request': request,
@@ -113,7 +115,7 @@ def signup(request):
         form = UserCreationForm(request.POST)
         if form.is_valid():
             form.save()
-            return HttpResponseRedirect(reverse('home'))
+            return HttpResponseRedirect(reverse('tron-home'))
     else:
         form = UserCreationForm()
 
@@ -127,7 +129,7 @@ def login(request):
         form = AuthenticationForm(data=request.POST)
         if form.is_valid():
             auth_login(request, form.get_user())
-            return HttpResponseRedirect(reverse('home'))
+            return HttpResponseRedirect(reverse('tron-home'))
     else:
         form = AuthenticationForm(request)
 

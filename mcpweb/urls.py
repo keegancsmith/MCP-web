@@ -12,8 +12,8 @@ urlpatterns = patterns(
 
     url(r'^$', 'home', name='tron-home'),
     url(r'^new-game/$', 'new_game', name='new-tron-game'),
-    url(r'^signup/$', 'signup', name='signup'),
-    url(r'^login/$', 'login', name='login'),
+    url(r'^accounts/signup/$', 'signup', name='signup'),
+    url(r'^accounts/login/$', 'login', name='login'),
 
     url(r'^admin/', include(admin.site.urls)),
 )
