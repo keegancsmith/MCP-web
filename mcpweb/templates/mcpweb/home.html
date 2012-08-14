@@ -19,8 +19,12 @@
 </div>
 </div>
 {% else %}
-<h3>Hi {{ user.username }}, you are currently playing in {{ active.count }}
-games. You have finished {{ finished.count }} games.</h3>
+
+<p>Hi <strong>{{ user.username }}</strong>! You are currently playing in
+<span class="badge">{{ active.count }}</span> game{{ active.count|pluralize }}.
+You have finished <span class="badge">{{ finished.count }}</span>
+game{{ finished.count|pluralize }}.</p>
+
 <h2>Active Games</h2>
 <ul>
   {% for game in active %}
