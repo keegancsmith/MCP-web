@@ -1,6 +1,6 @@
 {% extends "mcpweb/base.html" %}
+{% load humanize %}
 {% block content %}
-<!DOCTYPE html>
 <div id="introduction">
   <p class="lead">This website
     allows <a href="http://challenge.entelect.co.za/Home/Rules">Entellect
@@ -24,15 +24,20 @@ games. You have finished {{ finished.count }} games.</h3>
 <h2>Active Games</h2>
 <ul>
   {% for game in active %}
-  <li><a href="{{ game.get_absolute_url }}">{{ game }}</a></li>
+  <li><a href="{{ game.get_absolute_url }}">Game {{ game.pk }}</a> against
+    <strong>{% if game.player1 == request.user %}{{ game.player2.username }}{% else %}{{ game.player1.username }}{% endif %}</strong>
+    last played {{ game.last_played|naturaltime }}</li>
   {% endfor %}
 </ul>
 
 <h2>Finished Games</h2>
 <ul>
 {% for game in finished %}
-  <li><a href="{{ game.get_absolute_url }}">{{ game }}</a></li>
-  {% endfor %}
+  <li><strong>{% if game.winner == tie %}Tied{% else %}{% for user in game.winners %}{% if user == request.user %}Won{% else %}Lost{% endif %}{% endfor %}{% endif %}</strong>
+    <a href="{{ game.get_absolute_url }}">Game {{ game.pk }}</a> against
+    <strong>{% if game.player1 == request.user %}{{ game.player2.username }}{% else %}{{ game.player1.username }}{% endif %}</strong>
+    finished {{ game.last_played|naturaltime }}</li>
+{% endfor %}
 </ul>
 {% endif %}
 {% endblock %}
