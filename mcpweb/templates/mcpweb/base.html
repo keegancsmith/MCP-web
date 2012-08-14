@@ -18,6 +18,9 @@
             <li><a href="{% url signup %}">Signup</a></li>
           </ul>
           {% else %}
+          <ul class="nav nav-pills">
+            <li><a href="{% url new-tron-game %}">New Game</a></li>
+          </ul>
           <div class="btn-group pull-right">
             <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
               <i class="icon-user"></i> {{ request.user.username }}
