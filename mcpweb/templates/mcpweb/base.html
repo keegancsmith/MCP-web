@@ -35,19 +35,20 @@
     <div id="content" class="container">
     {% block content %}
     {% endblock %}
+
+    {% block footer %}
+    <hr>
+    <footer>
+      <p>Created by <a href="http://people.cs.uct.ac.za/~ksmith/">Keegan
+          Carruthers-Smith</a> 2012
+          [<a href="https://bitbucket.org/keegan_csmith/mcp-web">Bitbucket</a>]
+          [<a href="https://github.com/keegancsmith/MCP-web">Github</a>]</p>
+    </footer>
+    {% endblock %}
     </div>
 
     {% block extra_content %}
     {% endblock %}
-
-    <div id="footer" class="container pull-right">
-    {% block footer %}
-    Created by <a href="http://people.cs.uct.ac.za/~ksmith/">Keegan
-    Carruthers-Smith</a> 2012
-    [<a href="https://bitbucket.org/keegan_csmith/mcp-web">Bitbucket</a>]
-    [<a href="https://github.com/keegancsmith/MCP-web">Github</a>]
-    {% endblock %}
-    </div>
 
     <script type="text/javascript" src="{{ STATIC_URL }}scripts/jquery.min.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}scripts/bootstrap.min.js"></script>

@@ -8,11 +8,25 @@
     <a href="http://www.google.com/chrome/">browser</a>.
   </canvas>
 </div>
-<div id="info">
-  <ul>
-    {% if player1_url %}<li>Player 1 {{ player1_url }}</li>{% endif %}
-    {% if player2_url %}<li>Player 2 {{ player2_url }}</li>{% endif %}
-  </ul>
+
+<div id="info" class="row">
+{% if player1_url or player2_url %}
+<h3>Game URLs</h3>
+<div class="span6">
+  <dl class="dl-horizontal">
+    {% if player1_url %}<dt>Player 1</dt><dd>{{ player1_url }}</dd>{% endif %}
+    {% if player2_url %}<dt>Player 2</dt><dd>{{ player2_url }}</dd>{% endif %}
+  </dl>
+</div>
+<div class="alert alert-info span5">
+  <button class="close" data-dismiss="alert">×</button>
+  <h4 class="alert-heading">How To Use</h4>
+  Install <a href="http://pypi.python.org/pypi/MCP">MCP</a> then run
+  <span class="label label-info">mcp remote {% firstof player1_url player2_url %}</span>
+  in the top level directory of your bot. Or specify the command to run your
+  bot with the <span class="label label-info">--command</span> flag.
+</div>
+{% endif %}
 </div>
 {% endblock %}
 
