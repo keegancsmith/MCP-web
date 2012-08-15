@@ -10,6 +10,7 @@ urlpatterns = patterns(
 
     url(r'^game/(\d+)/$', 'game_viewer', name='tron-game'),
     url(r'^game/(\d+)/([a-zA-Z0-9]+)/$', 'game_api', name='tron-game-api'),
+    url(r'^game-history/(\d+)/$', 'game_history_api', name='tron-game-history-api'),
 
     url(r'^$', 'home', name='tron-home'),
     url(r'^new-game/$', 'new_game', name='new-tron-game'),

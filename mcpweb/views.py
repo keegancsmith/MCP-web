@@ -79,6 +79,21 @@ def game_api(request, token):
     return HttpResponse(json_state, content_type='application/json')
 
 
+@game_view
+@condition(etag_func=lambda r, *a, **k: str(r.game.turn),
+           last_modified_func=lambda r, *a, **k: r.game.last_played)
+def game_history_api(request):
+    game = request.game
+
+    cache_key = 'trongame-%d-history' % game.id
+    json_state = cache.get(cache_key, version=game.turn)
+    if json_state is None:
+        json_state = json.dumps(game.build_history())
+        cache.set(cache_key, json_state, version=game.turn)
+
+    return HttpResponse(json_state, content_type='application/json')
+
+
 @csrf_protect
 @login_required
 def new_game(request):

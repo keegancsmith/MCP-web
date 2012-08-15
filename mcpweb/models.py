@@ -49,7 +49,7 @@ class TronGame(models.Model):
     last_played = models.DateTimeField(default=datetime.now)
 
     # Tokens can never be 'public', but the length of strings returned by
-    # get_random_string are 12, so it won't ever generate the string 'public'.
+    # get_random_string are 12, so it shouldn't collide
     player1_token = models.CharField(max_length=10, editable=False,
                                      default=get_random_string)
     player2_token = models.CharField(max_length=10, editable=False,
@@ -173,6 +173,33 @@ class TronGame(models.Model):
                         dictify_user(self.player2)],
         }
 
+    def build_history(self):
+        history = [[None] * 30 for _ in range(30)]
+        start_you = None
+        start_opponent = None
+        for h in self.trongamestatehistory_set.all():
+            gs = load_game_state(h.game_state)
+            if h.turn == 0:
+                start_you = tuple(gs.you)
+                start_opponent = tuple(gs.opponent)
+                history[gs.you.y][gs.you.x] = 0
+                history[gs.opponent.y][gs.opponent.x] = 0
+                continue
+
+            p = gs.opponent if h.turn % 2 == 0 else gs.you
+            if p.at_pole:
+                for x in range(30):
+                    history[p.y][x] = h.turn
+            else:
+                history[p.y][p.x] = h.turn
+
+        return {
+            'history': history,
+            'turn': self.turn,
+            'start_you': start_you,
+            'start_opponent': start_opponent,
+        }
+
     @models.permalink
     def get_absolute_url(self):
         return ('tron-game', [str(self.id)])
@@ -199,3 +226,8 @@ class TronGameStateHistory(models.Model):
 
     class Meta:
         unique_together = ('tron_game', 'turn')
+        ordering = ['tron_game', 'turn']
+
+    def __unicode__(self):
+        return (u'Tron Game History %d for turn %d'
+                % (self.tron_game.id, self.turn))
