@@ -1,30 +1,16 @@
 import mcp
 
-import random
-import string
-
 from datetime import datetime
 
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils.crypto import get_random_string
 
 
 def load_game_state(game_state_str):
     if isinstance(game_state_str, mcp.GameState):
         return game_state_str
     return mcp.GameState.loads(game_state_str)
-
-
-def generate_token():
-    valid_chars = string.ascii_letters + string.digits
-    return ''.join(random.choice(valid_chars) for _ in xrange(10))
-
-
-def generate_player_token():
-    while True:
-        token = generate_token()
-        if token != 'public':
-            return token
 
 
 def generate_game_state():
@@ -61,10 +47,13 @@ class TronGame(models.Model):
     turn = models.IntegerField(default=0)
     date_created = models.DateTimeField(default=datetime.now)
     last_played = models.DateTimeField(default=datetime.now)
+
+    # Tokens can never be 'public', but the length of strings returned by
+    # get_random_string are 12, so it won't ever generate the string 'public'.
     player1_token = models.CharField(max_length=10, editable=False,
-                                     default=generate_player_token)
+                                     default=get_random_string)
     player2_token = models.CharField(max_length=10, editable=False,
-                                     default=generate_player_token)
+                                     default=get_random_string)
 
     class Meta:
         ordering = ['-date_created']
@@ -198,7 +187,8 @@ class TronGame(models.Model):
                 return unicode(p)
         players_str = u', '.join(map(mark_current_player, self.players))
         if self.winners:
-            game_str += u' won by %s.' % u' and '.join(map(unicode, self.winners))
+            winners = u' and '.join(map(unicode, self.winners))
+            game_str += u' won by %s.' % winners
         return u'%s %s' % (game_str, players_str)
 
 
