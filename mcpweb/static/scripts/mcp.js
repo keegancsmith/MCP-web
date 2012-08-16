@@ -9,6 +9,7 @@ var tron_game_viewer = {
     ctx: null,
     state: null,
     game_state: null,
+    pause: false,
 
     init: function(urls, canvas) {
         this.urls = urls;
@@ -25,34 +26,40 @@ var tron_game_viewer = {
     },
 
     post_fetch: function(state) {
+        if (this.pause)
+            return;
         var old_state = this.state;
         this.state = state;
         setTimeout($.proxy(this, 'fetch'), 2000);
         // Only redraw if something changed
         if (old_state === null || old_state.turn != state.turn) {
-            this.parse_game_state();
+            this.game_state = this.parse_game_state();
             this.draw();
         }
     },
 
-    parse_game_state: function() {
-        this.game_state = [];
-        var i = 0;
-        for (i = 0; i < 30 * 30; i++) {
+    _empty_game_state: function() {
+        var game_state = [];
+        for (var i = 0; i < 30 * 30; i++) {
             if (i % 30 == 0)
-                this.game_state.push([]);
-            this.game_state[this.game_state.length - 1].push('');
+                game_state.push([]);
+            game_state[game_state.length - 1].push('');
         }
+        return game_state;
+    },
 
+    parse_game_state: function() {
+        var game_state = this._empty_game_state();
         var lines = this.state.game_state.split('\r\n');
-        for (i = 0; i < lines.length; i++) {
+        for (var i = 0; i < lines.length; i++) {
             var tokens = lines[i].split(' ');
             if (tokens.length == 3) {
                 var x = parseInt(tokens[0]);
                 var y = parseInt(tokens[1]);
-                this.game_state[x][y] = tokens[2];
+                game_state[y][x] = tokens[2];
             }
         }
+        return game_state;
     },
 
     draw: function() {
@@ -74,7 +81,7 @@ var tron_game_viewer = {
             var row = this.game_state[i];
             for (var j = 0; j < row.length; j++) {
                 ctx.fillStyle = colour_map[row[j]];
-                ctx.fillRect(i * cell_size, j * cell_size,
+                ctx.fillRect(j * cell_size, i * cell_size,
                              cell_size, cell_size);
             }
         }
@@ -111,6 +118,61 @@ var tron_game_viewer = {
         }
 
         ctx.restore();
+    }
+};
+
+
+var tron_history = {
+    history: null,
+    turn: 0,
+
+    animate_history: function() {
+        $.get(tron_game_viewer.urls.history, {}, $.proxy(this, 'post_fetch'));
+    },
+
+    post_fetch: function(history) {
+        tron_game_viewer.pause = true;
+        this.history = history;
+        this.turn = 0;
+        setTimeout($.proxy(this, 'history_tick'), 0);
+    },
+
+    history_tick: function() {
+        tron_game_viewer.game_state = this.parse_game_history();
+        tron_game_viewer.draw();
+        this.turn++;
+        if (this.turn <= tron_game_viewer.state.turn) {
+            setTimeout($.proxy(this, 'history_tick', 500));
+        } else {
+            tron_game_viewer.pause = false;
+            tron_game_viewer.state = null;
+            tron_game_viewer.fetch();
+        }
+    },
+
+    parse_game_history: function() {
+        var game_state = tron_game_viewer._empty_game_state();
+
+        for (var i = 0; i < 30; i++) {
+            var row = game_state[i];
+            var hist_row = this.history.history[i];
+            for (var j = 0; j < 30; j++) {
+                if (hist_row[j] === null || this.turn < hist_row[j]) {
+                    row[j] = 'Clear';
+                } else if (this.turn - 1 <= hist_row[j]) {
+                    row[j] = hist_row[j] % 2 == 1 ? 'You' : 'Opponent';
+                } else {
+                    row[j] = hist_row[j] % 2 == 1 ? 'YourWall' : 'OpponentWall';
+                }
+            }
+        }
+
+        var p1 = this.history.start_player1;
+        var p2 = this.history.start_player2;
+        game_state[p1[1]][p1[0]] = this.turn == 0 ? 'You' : 'YourWall';
+        game_state[p2[1]][p2[0]] = this.turn <= 1 ? 'Opponent' : 'OpponentWall';
+
+        return game_state;
     }
 };
 

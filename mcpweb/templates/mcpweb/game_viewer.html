@@ -11,8 +11,12 @@
 
 <div id="info" class="row">
 {% if player1_url or player2_url %}
-<h3>Game URLs</h3>
+<div class="span12">
+  <h3>Actions</h3>
+  <a class="btn" href="javascript:tron_history.animate_history();">Replay</a>
+</div>
 <div class="span6">
+  <h3>Game URLs</h3>
   <dl class="dl-horizontal">
     {% if player1_url %}<dt>Player 1</dt><dd>{{ player1_url }}</dd>{% endif %}
     {% if player2_url %}<dt>Player 2</dt><dd>{{ player2_url }}</dd>{% endif %}
@@ -35,7 +39,8 @@
 <script type="text/javascript" src="{{ STATIC_URL }}scripts/mcp.js"></script>
 <script type="text/javascript">
   init({
-      game: "{% url tron-game-api game.id 'public' %}"
+  game: "{% url tron-game-api game.id 'public' %}",
+  history: "{% url tron-game-history-api game.id %}"
   });
 </script>
 {% endblock %}

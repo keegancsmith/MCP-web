@@ -175,13 +175,13 @@ class TronGame(models.Model):
 
     def build_history(self):
         history = [[None] * 30 for _ in range(30)]
-        start_you = None
-        start_opponent = None
+        start_player1 = None
+        start_player2 = None
         for h in self.trongamestatehistory_set.all():
             gs = load_game_state(h.game_state)
             if h.turn == 0:
-                start_you = tuple(gs.you)
-                start_opponent = tuple(gs.opponent)
+                start_player1 = tuple(gs.you)
+                start_player2 = tuple(gs.opponent)
                 history[gs.you.y][gs.you.x] = 0
                 history[gs.opponent.y][gs.opponent.x] = 0
                 continue
@@ -196,8 +196,8 @@ class TronGame(models.Model):
         return {
             'history': history,
             'turn': self.turn,
-            'start_you': start_you,
-            'start_opponent': start_opponent,
+            'start_player1': start_player1,
+            'start_player2': start_player2,
         }
 
     @models.permalink
