@@ -124,25 +124,29 @@ var tron_game_viewer = {
 
 var tron_history = {
     history: null,
-    turn: 0,
+    p1_moves: 0,
+    p2_moves: 0,
+    tick: 0,
 
     animate_history: function() {
         $.get(tron_game_viewer.urls.history, {}, $.proxy(this, 'post_fetch'));
     },
 
-    post_fetch: function(history) {
+    post_fetch: function(resp) {
         tron_game_viewer.pause = true;
-        this.history = history;
-        this.turn = 0;
+        this.history = resp.history;
+        this.p1_moves = resp.p1_moves;
+        this.p2_moves = resp.p2_moves;
+        this.tick = 0;
         setTimeout($.proxy(this, 'history_tick'), 0);
     },
 
     history_tick: function() {
         tron_game_viewer.game_state = this.parse_game_history();
         tron_game_viewer.draw();
-        this.turn++;
-        if (this.turn <= tron_game_viewer.state.turn) {
-            setTimeout($.proxy(this, 'history_tick', 500));
+        this.tick++;
+        if (this.tick <= this.p1_moves + this.p2_moves - 2) {
+            setTimeout($.proxy(this, 'history_tick'), 250);
         } else {
             tron_game_viewer.pause = false;
             tron_game_viewer.state = null;
@@ -152,25 +156,27 @@ var tron_history = {
 
     parse_game_history: function() {
         var game_state = tron_game_viewer._empty_game_state();
+        var max_p1 = Math.floor((this.tick - 1) / 2 + 2);
+        var min_p2 = -Math.floor(this.tick / 2 + 1);
+        if (this.tick == 0) {
+            max_p1 = 1;
+            min_p2 = -1;
+        }
 
         for (var i = 0; i < 30; i++) {
             var row = game_state[i];
-            var hist_row = this.history.history[i];
+            var hist_row = this.history[i];
             for (var j = 0; j < 30; j++) {
-                if (hist_row[j] === null || this.turn < hist_row[j]) {
+                var turn = hist_row[j];
+                if (turn == 0 || turn < min_p2 || turn > max_p1) {
                     row[j] = 'Clear';
-                } else if (this.turn - 1 <= hist_row[j]) {
-                    row[j] = hist_row[j] % 2 == 1 ? 'You' : 'Opponent';
+                } else if (turn > 0) {
+                    row[j] = turn == max_p1 ? 'You' : 'YourWall';
                 } else {
-                    row[j] = hist_row[j] % 2 == 1 ? 'YourWall' : 'OpponentWall';
+                    row[j] = turn == min_p2 ? 'Opponent' : 'OpponentWall';
                 }
             }
         }
-
-        var p1 = this.history.start_player1;
-        var p2 = this.history.start_player2;
-        game_state[p1[1]][p1[0]] = this.turn == 0 ? 'You' : 'YourWall';
-        game_state[p2[1]][p2[0]] = this.turn <= 1 ? 'Opponent' : 'OpponentWall';
 
         return game_state;
     }

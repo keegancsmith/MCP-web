@@ -23,6 +23,81 @@ def dictify_user(user):
     }
 
 
+class TronGameHistory(object):
+    def __init__(self, state=None):
+        if state is None:
+            state = {}
+        self.state = state
+        self._p1_turn = None
+        self._p2_turn = None
+
+    @property
+    def p1_turn(self):
+        if self._p1_turn is None:
+            if self.state:
+                self._p1_turn = max(self.state.itervalues()) + 1
+            else:
+                self._p1_turn = 1
+        return self._p1_turn
+
+    @property
+    def p2_turn(self):
+        if self._p2_turn is None:
+            if self.state:
+                self._p2_turn = -(min(self.state.itervalues()) - 1)
+            else:
+                self._p2_turn = 1
+        return self._p2_turn
+
+    def add_move(self, is_player1, pos):
+        if is_player1:
+            self.state[pos] = self.p1_turn
+            self._p1_turn += 1
+        else:
+            self.state[pos] = -self.p2_turn
+            self._p2_turn += 1
+
+    @classmethod
+    def loads(cls, s):
+        state = {}
+        for line in s.splitlines():
+            x, y, turn = map(int, line.split())
+            state[mcp.Position(x, y)] = turn
+        return cls(state)
+
+    def dumps(self):
+        return '\n'.join('%d %d %d' % (p.x, p.y, t)
+                         for p, t in self.state.iteritems())
+
+    def dump_rows(self):
+        rows = [[0] * 30 for _ in range(30)]
+        for p, turn in self.state.iteritems():
+            if p.at_pole:
+                for x in range(30):
+                    rows[p.y][x] = turn
+            else:
+                rows[p.y][p.x] = turn
+        return rows
+
+    def assert_consistent(self, game_state):
+        count_p1 = 0
+        count_p2 = 0
+        for p, v in game_state:
+            if v == 'Clear':
+                assert p not in self.state
+            elif 'You' in v:
+                count_p1 += 1
+                assert self.state[p] > 0
+            else:
+                count_p2 += 1
+                assert self.state[p] < 0
+        assert self.state[game_state.you] == self.p1_turn - 1
+        assert -self.state[game_state.opponent] == self.p2_turn - 1
+        assert count_p1 == self.p1_turn - 1
+        assert count_p2 == self.p2_turn - 1
+        assert len(set(self.state.itervalues())) == len(self.state)
+
+
 class TronGame(models.Model):
     WINNER_CHOICES = (
         (u'inprogress', u'inprogress'),
@@ -44,6 +119,7 @@ class TronGame(models.Model):
     description = models.CharField(max_length=50,
                                    default='Waiting for player 1 to go.')
     game_state = models.TextField(default=generate_game_state)
+    game_history = models.TextField(default='')
     turn = models.IntegerField(default=0)
     date_created = models.DateTimeField(default=datetime.now)
     last_played = models.DateTimeField(default=datetime.now)
@@ -118,6 +194,16 @@ class TronGame(models.Model):
         self.last_played = datetime.now()
         self.turn += 1
 
+        # game history
+        is_player1 = self.turn % 2 == 1
+        pos = game_state.you if is_player1 else game_state.opponent
+        assert is_player1 == (self.player1 == player)
+        gh = self.game_history
+        if not isinstance(gh, TronGameHistory):
+            gh = TronGameHistory.loads(gh)
+        gh.add_move(is_player1, pos)
+        self.game_history = gh
+
         can_move = lambda p: len(list(game_state.neighbours(p))) > 0
         p1_can_move = can_move(game_state.you)
         p2_can_move = can_move(game_state.opponent)
@@ -147,13 +233,18 @@ class TronGame(models.Model):
         self.save()
 
     def save(self, *args, **kw):
-        ret = super(TronGame, self).save(*args, **kw)
-        if not self.trongamestatehistory_set.filter(turn=self.turn).exists():
-            h = TronGameStateHistory(tron_game=self,
-                                     game_state=self.game_state,
-                                     turn=self.turn)
-            h.save()
-        return ret
+        gs = load_game_state(self.game_state)
+        if self.turn == 0:
+            # On the initial state we need to setup the game history
+            gh = TronGameHistory({gs.you: 1, gs.opponent: -1})
+        else:
+            gh = self.game_history
+        if not isinstance(gh, TronGameHistory):
+            gh = TronGameHistory.loads(gh)
+        gh.assert_consistent(gs)
+        self.game_state = gs.dumps()
+        self.game_history = gh.dumps()
+        return super(TronGame, self).save(*args, **kw)
 
     def dictify(self, request, player=None):
         url = request.build_absolute_uri(self.get_absolute_url())
@@ -174,30 +265,14 @@ class TronGame(models.Model):
         }
 
     def build_history(self):
-        history = [[None] * 30 for _ in range(30)]
-        start_player1 = None
-        start_player2 = None
-        for h in self.trongamestatehistory_set.all():
-            gs = load_game_state(h.game_state)
-            if h.turn == 0:
-                start_player1 = tuple(gs.you)
-                start_player2 = tuple(gs.opponent)
-                history[gs.you.y][gs.you.x] = 0
-                history[gs.opponent.y][gs.opponent.x] = 0
-                continue
-
-            p = gs.opponent if h.turn % 2 == 0 else gs.you
-            if p.at_pole:
-                for x in range(30):
-                    history[p.y][x] = h.turn
-            else:
-                history[p.y][p.x] = h.turn
+        gh = self.game_history
+        if not isinstance(gh, TronGameHistory):
+            gh = TronGameHistory.loads(gh)
 
         return {
-            'history': history,
-            'turn': self.turn,
-            'start_player1': start_player1,
-            'start_player2': start_player2,
+            'history': gh.dump_rows(),
+            'p1_moves': gh.p1_turn - 1,
+            'p2_moves': gh.p2_turn - 1,
         }
 
     @models.permalink
@@ -217,17 +292,3 @@ class TronGame(models.Model):
             winners = u' and '.join(map(unicode, self.winners))
             game_str += u' won by %s.' % winners
         return u'%s %s' % (game_str, players_str)
-
-
-class TronGameStateHistory(models.Model):
-    tron_game = models.ForeignKey(TronGame)
-    game_state = models.TextField()
-    turn = models.IntegerField(default=0)
-
-    class Meta:
-        unique_together = ('tron_game', 'turn')
-        ordering = ['tron_game', 'turn']
-
-    def __unicode__(self):
-        return (u'Tron Game History %d for turn %d'
-                % (self.tron_game.id, self.turn))

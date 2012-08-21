@@ -8,15 +8,25 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        # Deleting field 'TronGame.current_player'
-        db.delete_column('mcpweb_trongame', 'current_player')
+        # Removing unique constraint on 'TronGameStateHistory', fields ['tron_game', 'turn']
+        db.delete_unique('mcpweb_trongamestatehistory', ['tron_game_id', 'turn'])
+
+        # Deleting model 'TronGameStateHistory'
+        db.delete_table('mcpweb_trongamestatehistory')
 
 
     def backwards(self, orm):
-        # Adding field 'TronGame.current_player'
-        db.add_column('mcpweb_trongame', 'current_player',
-                      self.gf('django.db.models.fields.IntegerField')(default=1, null=True, blank=True),
-                      keep_default=False)
+        # Adding model 'TronGameStateHistory'
+        db.create_table('mcpweb_trongamestatehistory', (
+            ('turn', self.gf('django.db.models.fields.IntegerField')(default=0)),
+            ('game_state', self.gf('django.db.models.fields.TextField')()),
+            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('tron_game', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['mcpweb.TronGame'])),
+        ))
+        db.send_create_signal('mcpweb', ['TronGameStateHistory'])
+
+        # Adding unique constraint on 'TronGameStateHistory', fields ['tron_game', 'turn']
+        db.create_unique('mcpweb_trongamestatehistory', ['tron_game_id', 'turn'])
 
 
     models = {
@@ -57,25 +67,19 @@ class Migration(SchemaMigration):
             'name': ('django.db.models.fields.CharField', [], {'max_length': '100'})
         },
         'mcpweb.trongame': {
-            'Meta': {'object_name': 'TronGame'},
+            'Meta': {'ordering': "['-date_created']", 'object_name': 'TronGame'},
             'date_created': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
             'description': ('django.db.models.fields.CharField', [], {'default': "'Waiting for player 1 to go.'", 'max_length': '50'}),
-            'game_state': ('django.db.models.fields.TextField', [], {}),
+            'game_history': ('django.db.models.fields.TextField', [], {'default': "''"}),
+            'game_state': ('django.db.models.fields.TextField', [], {'default': "''"}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'last_played': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
             'player1': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'player1'", 'to': "orm['auth.User']"}),
-            'player1_token': ('django.db.models.fields.CharField', [], {'default': "'x1zYWIvRei'", 'max_length': '10'}),
+            'player1_token': ('django.db.models.fields.CharField', [], {'default': "'jQyur4J07D1p'", 'max_length': '10'}),
             'player2': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'player2'", 'to': "orm['auth.User']"}),
-            'player2_token': ('django.db.models.fields.CharField', [], {'default': "'dTB9O9VG9p'", 'max_length': '10'}),
+            'player2_token': ('django.db.models.fields.CharField', [], {'default': "'72rTE9cOZGc7'", 'max_length': '10'}),
             'turn': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
             'winner': ('django.db.models.fields.CharField', [], {'default': "u'inprogress'", 'max_length': '10'})
-        },
-        'mcpweb.trongamestatehistory': {
-            'Meta': {'unique_together': "(('tron_game', 'turn'),)", 'object_name': 'TronGameStateHistory'},
-            'game_state': ('django.db.models.fields.TextField', [], {}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'tron_game': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['mcpweb.TronGame']"}),
-            'turn': ('django.db.models.fields.IntegerField', [], {'default': '0'})
         }
     }
 

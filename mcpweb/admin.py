@@ -13,7 +13,7 @@ class TronGameAdmin(admin.ModelAdmin):
             'classes': ('collapse',),
             'fields': ('turn',
                        ('date_created', 'last_played'),
-                       'game_state')
+                       'game_state', 'game_history')
         }),
         ('Readonly Properties', {
             'classes': ('collapse',),
