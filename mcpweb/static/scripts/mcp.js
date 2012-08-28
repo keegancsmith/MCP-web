@@ -144,10 +144,17 @@ var tron_history = {
     history_tick: function() {
         tron_game_viewer.game_state = this.parse_game_history();
         tron_game_viewer.draw();
+
+        var max_ticks = this.p1_moves + this.p2_moves - 2;
+        var progress = $('#replay-progress');
+
         this.tick++;
-        if (this.tick <= this.p1_moves + this.p2_moves - 2) {
+        if (this.tick <= max_ticks) {
             setTimeout($.proxy(this, 'history_tick'), 250);
+            progress.addClass('active');
+            progress.find('.bar').attr('style', 'width: ' + (this.tick / max_ticks) * 100 + '%;');
         } else {
+            progress.removeClass('active');
             tron_game_viewer.pause = false;
             tron_game_viewer.state = null;
             tron_game_viewer.fetch();

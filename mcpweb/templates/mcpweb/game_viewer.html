@@ -2,7 +2,7 @@
 
 {% block content %}
 <div id="game">
-  <canvas id="canvas" width="500" height="600" tabindex="0">Your browser
+  <canvas id="canvas" width="500" height="575" tabindex="0">Your browser
     does not support canvas. Upgrade to a
     <a href="http://www.mozilla.com/en-US/firefox/new/">modern</a>
     <a href="http://www.google.com/chrome/">browser</a>.
@@ -11,8 +11,15 @@
 
 <div id="info" class="row">
 <div class="span12">
-  <h3>Actions</h3>
-  <a class="btn" href="javascript:tron_history.animate_history();">Replay</a>
+  <h3>Replay</h3>
+  <div class="row">
+    <div class="span1">
+      <a class="btn" href="javascript:tron_history.animate_history();">Replay</a>
+    </div>
+    <div id="replay-progress" class="span4 progress progress-striped">
+      <div class="bar" style="width: 0%;"></div>
+    </div>
+  </div>
 </div>
 {% if player1_url or player2_url %}
 <div class="span6">
