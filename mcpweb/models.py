@@ -2,8 +2,9 @@ import mcp
 
 from datetime import datetime
 
-from django.db import models
 from django.contrib.auth.models import User
+from django.db import models
+from django.db.models.signals import post_save
 from django.utils.crypto import get_random_string
 
 
@@ -292,3 +293,19 @@ class TronGame(models.Model):
             winners = u' and '.join(map(unicode, self.winners))
             game_str += u' won by %s.' % winners
         return u'%s %s' % (game_str, players_str)
+
+
+class UserProfile(models.Model):
+    user = models.OneToOneField(User)
+    auth_token = models.CharField(max_length=10, default=get_random_string)
+
+    def __unicode__(self):
+        return unicode(self.user)
+
+
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+        UserProfile.objects.create(user=instance)
+
+
+post_save.connect(create_user_profile, sender=User)

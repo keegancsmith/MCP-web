@@ -1,5 +1,5 @@
 from django.contrib import admin
-from mcpweb.models import TronGame
+from mcpweb.models import TronGame, UserProfile
 
 
 class TronGameAdmin(admin.ModelAdmin):
@@ -28,4 +28,9 @@ class TronGameAdmin(admin.ModelAdmin):
                     'date_created', 'last_played')
     radio_fields = {'winner': admin.HORIZONTAL}
 
+
+class UserProfileAdmin(admin.ModelAdmin):
+    readonly_fields = ('user',)
+
 admin.site.register(TronGame, TronGameAdmin)
+admin.site.register(UserProfile, UserProfileAdmin)
