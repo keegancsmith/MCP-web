@@ -127,18 +127,26 @@ var tron_history = {
     p1_moves: 0,
     p2_moves: 0,
     tick: 0,
+    tick_speed: 250,
+    tick_timer: null,
 
-    animate_history: function() {
+    animate_history: function(tick_speed) {
+        this.tick_speed = tick_speed;
         $.get(tron_game_viewer.urls.history, {}, $.proxy(this, 'post_fetch'));
     },
 
     post_fetch: function(resp) {
+        if (this.tick_timer !== null) {
+            clearTimeout(this.tick_timer);
+            this.tick_timer = null;
+        }
+
         tron_game_viewer.pause = true;
         this.history = resp.history;
         this.p1_moves = resp.p1_moves;
         this.p2_moves = resp.p2_moves;
         this.tick = 0;
-        setTimeout($.proxy(this, 'history_tick'), 0);
+        this.tick_timer = setTimeout($.proxy(this, 'history_tick'), 0);
     },
 
     history_tick: function() {
@@ -150,10 +158,11 @@ var tron_history = {
 
         this.tick++;
         if (this.tick <= max_ticks) {
-            setTimeout($.proxy(this, 'history_tick'), 250);
+            this.tick_timer = setTimeout($.proxy(this, 'history_tick'), this.tick_speed);
             progress.addClass('active');
             progress.find('.bar').attr('style', 'width: ' + (this.tick / max_ticks) * 100 + '%;');
         } else {
+            this.tick_timer = null;
             progress.removeClass('active');
             tron_game_viewer.pause = false;
             tron_game_viewer.state = null;
