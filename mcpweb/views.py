@@ -6,6 +6,7 @@ from mcpweb.forms import AuthenticationForm, NewTronGameForm, UserCreationForm
 
 from django.contrib.auth import login as auth_login
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse, HttpResponseForbidden, \
@@ -117,8 +118,9 @@ def home(request):
     }
 
     if request.user.is_authenticated():
-        context['active'] = TronGame.objects.filter(winner=u'inprogress')
-        context['finished'] = TronGame.objects.exclude(winner=u'inprogress')
+        trongames = request.user.userprofile.trongames()
+        context['active'] = trongames.filter(winner=u'inprogress')
+        context['finished'] = trongames.exclude(winner=u'inprogress')
 
     return render(request, 'mcpweb/home.html', context)
 
@@ -149,3 +151,19 @@ def login(request):
 
     return render(request, 'mcpweb/form.html',
                   {'form': form, 'title': 'Login'})
+
+
+def user_api(request, user_id, token):
+    user = get_object_or_404(User, pk=user_id)
+    if user.userprofile.auth_token != token:
+        return HttpResponseNotFound()
+
+    trongames = user.userprofile.trongames()
+    active = trongames.filter(winner=u'inprogress')
+    url = lambda game: request.build_absolute_uri(game.get_absolute_url())
+    resp = {
+        'your_turn': [url(g) for g in active if g.current_user == user],
+        'opponent_turn': [url(g) for g in active if g.current_user != user],
+    }
+
+    return HttpResponse(json.dumps(resp), content_type='application/json')

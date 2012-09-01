@@ -299,6 +299,10 @@ class UserProfile(models.Model):
     user = models.OneToOneField(User)
     auth_token = models.CharField(max_length=10, default=get_random_string)
 
+    def trongames(self):
+        return TronGame.objects.filter(
+            models.Q(player1=self.user) | models.Q(player2=self.user))
+
     def __unicode__(self):
         return unicode(self.user)
 
