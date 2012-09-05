@@ -74,7 +74,9 @@ def game_api(request, token):
     cache_key = 'trongame-%d-%s' % (game.id, token)
     json_state = cache.get(cache_key, version=game.turn)
     if json_state is None:
-        json_state = json.dumps(game.dictify(request, player))
+        json_state = game.dictify(request, player)
+        json_state['response_type'] = 'trongame'
+        json_state = json.dumps(json_state)
         cache.set(cache_key, json_state, version=game.turn)
 
     return HttpResponse(json_state, content_type='application/json')
@@ -158,10 +160,15 @@ def user_api(request, user_id, token):
     if user.userprofile.auth_token != token:
         return HttpResponseNotFound()
 
+    def url(g):
+        token = g.player1_token if g.player1 == user else g.player2_token
+        base_url = request.build_absolute_uri(g.get_absolute_url())
+        return '%s%s/' % (base_url, token)
+
     trongames = user.userprofile.trongames()
     active = trongames.filter(winner=u'inprogress')
-    url = lambda game: request.build_absolute_uri(game.get_absolute_url())
     resp = {
+        'response_type': 'user',
         'your_turn': [url(g) for g in active if g.current_user == user],
         'opponent_turn': [url(g) for g in active if g.current_user != user],
     }
