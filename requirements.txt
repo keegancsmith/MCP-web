@@ -1,4 +1,4 @@
-Django==1.4.1
+Django==1.11.28
 MCP==0.1
 South==0.7.5
 django-crispy-forms==1.1.4
